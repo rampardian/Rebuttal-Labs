@@ -65,7 +65,7 @@ export default function Debate() {
               key={index}
               className={`flex ${exchange.role === "user" ? "justify-end" : "justify-start"}`}
             >
-              <div className={`max-w-xl flex flex-col ${exchange.role === "user" ? "items-end" : "items-start"}`}>
+              <div className={`max-w-xl w-full flex flex-col ${exchange.role === "user" ? "items-end" : "items-start"}`}>
                 {/* Speaker Label */}
                 <p className={`text-xs uppercase tracking-widest mb-2 font-bold ${
                   exchange.role === "user" ? "text-indigo-400" : "text-red-400"
@@ -80,8 +80,17 @@ export default function Debate() {
                     : "bg-gray-900 border border-gray-700 text-gray-300"
                 }`}>
                   {exchange.role === "ai" ? (
-                    <div className="prose prose-invert prose-sm max-w-none">
-                      <ReactMarkdown>{exchange.text}</ReactMarkdown>
+                    <div className="space-y-3 text-sm leading-relaxed">
+                      <ReactMarkdown
+                        components={{
+                          p: ({children}) => <p className="mb-3">{children}</p>,
+                          strong: ({children}) => <strong className="font-bold text-white">{children}</strong>,
+                          em: ({children}) => <em className="italic text-gray-300">{children}</em>,
+                          li: ({children}) => <li className="ml-4 list-disc mb-1">{children}</li>,
+                          ul: ({children}) => <ul className="mb-3">{children}</ul>,
+                          ol: ({children}) => <ol className="mb-3 list-decimal ml-4">{children}</ol>,
+                        }}
+                      >{exchange.text}</ReactMarkdown>
                     </div>
                   ) : (
                     <p>{exchange.text}</p>
