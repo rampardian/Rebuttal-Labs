@@ -9,7 +9,7 @@ export default function Home() {
           Rebuttal Labs
         </h1>
         <Link
-          to="/debate"
+          to="/debate/setup"
           className="bg-white text-black px-5 py-2 rounded-md font-medium hover:bg-gray-200 transition"
         >
           Start Debate
@@ -32,7 +32,7 @@ export default function Home() {
 
         <div className="mt-10">
           <Link
-            to="/debate"
+            to="/debate/setup"
             className="bg-indigo-500 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-indigo-600 transition"
           >
             Begin Your Debate
@@ -116,7 +116,7 @@ export default function Home() {
           Ready to test your reasoning?
         </h3>
         <Link
-          to="/debate"
+          to="/debate/setup"
           className="bg-white text-black px-8 py-3 rounded-md font-semibold hover:bg-gray-200 transition"
         >
           Start Now
