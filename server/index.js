@@ -30,11 +30,44 @@ app.post('/api/debate', async (req, res) => {
   }
 });
 
+app.post('/api/summary', async (req, res) => {
+  const { motion, stance, exchanges } = req.body;
+
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    
+    const transcript = exchanges.map((e) => 
+      `${e.role === 'user' ? 'USER' : 'OPPONENT'}: ${e.text}`
+    ).join('\n\n');
+
+    const prompt = `You are a debate judge. Analyze this debate and return ONLY a JSON object with no markdown, no backticks, no explanation.
+
+Motion: "${motion}"
+User Stance: "${stance}"
+
+Transcript:
+${transcript}
+
+Return this exact JSON structure:
+{
+  "userScore": <number from 0-100>,
+  "aiScore": <number from 0-100, must equal 100 minus userScore>,
+  "feedback": ["feedback point 1", "feedback point 2", "feedback point 3"]
+}`;
+
+    const result = await model.generateContent(prompt);
+    const raw = result.response.text();
+    const cleaned = raw.replace(/```json|```/g, "").trim();
+    const parsed = JSON.parse(cleaned);
+
+    res.json(parsed);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to generate summary' });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
-
-
-
-

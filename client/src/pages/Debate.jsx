@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import {useLocation} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
+
 
 
 export default function Debate() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { motion = "No motion provided.", stance, order, openingStatement} = location.state || {};
 
   const [exchanges, setExchanges] = useState(
@@ -182,7 +184,10 @@ export default function Debate() {
       ) : (
         <div className="border-t border-gray-800 px-8 py-6 text-center">
           <p className="text-gray-400 text-sm mb-4">Session ended.</p>
-          <button className="bg-indigo-500 px-6 py-2 rounded-md text-sm font-semibold hover:bg-indigo-600 transition">
+          <button
+            onClick={() => navigate("/debate/summary", { state: { motion, stance, exchanges } })}
+            className="bg-indigo-500 px-6 py-2 rounded-md text-sm font-semibold hover:bg-indigo-600 transition"
+          >
             View Summary
           </button>
         </div>
