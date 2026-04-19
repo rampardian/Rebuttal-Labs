@@ -1,28 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
+import {useLocation} from "react-router-dom";
 
-const PLACEHOLDER_MOTION = "This House believes that social media does more harm than good.";
 
 export default function Debate() {
-  const [exchanges, setExchanges] = useState([]);
+  const location = useLocation();
+  const { motion = "No motion provided.", stance, order, openingStatement} = location.state || {};
+
+  const [exchanges, setExchanges] = useState(
+    openingStatement ? [{role: "user", text: openingStatement}] : []
+  );
   const [userInput, setUserInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [sessionEnded, setSessionEnded] = useState(false);
 
-  const handleSubmit = async () => {
+  useEffect(() => {
+    if (openingStatement && order === "user") {
+      generateAIResponse(openingStatement);
+      }
+    }, []);
+
+    const generateAIResponse = async (argument) => {
+      setLoading(true);
+      try {
+        const response = await fetch("http://localhost:3000/api/debate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            motion,
+            userArgument: argument,
+          }),
+        });
+        const data = await response.json();
+        setExchanges((prevExchanges) => [...prevExchanges, { role: "ai", text: data.rebuttal }]);
+      } catch (error) {
+        setExchanges((prevExchanges) => [...prevExchanges, { role: "ai", text: "Error connecting to server." }]);
+      } finally {
+        setLoading(false);
+
+      }
+    };
+    const handleSubmit = async () => {
     if (!userInput.trim() || loading) return;
 
     const newExchanges = [...exchanges, { role: "user", text: userInput }];
     setExchanges(newExchanges);
     setUserInput("");
-    setLoading(true);
+    await generateAIResponse(userInput);
 
     try {
       const response = await fetch("http://localhost:3000/api/debate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          motion: PLACEHOLDER_MOTION,
+          motion: motion,
           userArgument: userInput,
         }),
       });
@@ -47,7 +78,7 @@ export default function Debate() {
       <div className="border-b border-gray-800 px-8 py-5">
         <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Motion</p>
         <h1 className="text-lg font-semibold text-white max-w-4xl">
-          {PLACEHOLDER_MOTION}
+          {motion}
         </h1>
       </div>
 
