@@ -20,10 +20,10 @@ app.post('/api/debate', async (req, res) => {
     const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite-preview' });
 
     const lengthInstruction = 
-      rebuttalMode === "blitz" ? " Respond in 5-10 sentences." :
-      rebuttalMode === "clash" ? " Respond in 11-20 sentences." :
-      rebuttalMode === "grandslam" ? " Respond in 21-25 sentences." : "";
-      " Respond in 5-10 sentences.";
+      rebuttalMode === "blitz" ? "Respond in 5-10 sentences." :
+      rebuttalMode === "clash" ? "Respond in 11-20 sentences." :
+      rebuttalMode === "grandslam" ? "Respond in 21-25 sentences." : "";
+      "Respond in 5-10 sentences.";
 
     const prompt = isOpening
       ? `You are a debate opponent. The motion is: "${motion}". Deliver a strong, structured opening argument in favor of your side in 5-10 sentences. One clear point per rebuttal. Use evidence-based reasoning. ${lengthInstruction}`
@@ -43,7 +43,7 @@ app.post('/api/summary', async (req, res) => {
   const { motion, stance, exchanges } = req.body;
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-preview' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite-preview' });
     
     const transcript = exchanges.map((e) => 
       `${e.role === 'user' ? 'USER' : 'OPPONENT'}: ${e.text}`
