@@ -14,14 +14,20 @@ app.get('/', (req, res) => {
 });
 
 app.post('/api/debate', async (req, res) => {
-  const { motion, userArgument, isOpening } = req.body;
+  const { motion, userArgument, isOpening, rebuttalMode } = req.body;
 
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
 
+    const lengthInstruction = 
+      rebuttalMode === "blitz" ? " Respond in 5-10 sentences." :
+      rebuttalMode === "clash" ? " Respond in 11-20 sentences." :
+      rebuttalMode === "grandslam" ? " Respond in 21-25 sentences." : "";
+      " Respond in 5-10 sentences.";
+
     const prompt = isOpening
-      ? `You are a debate opponent. The motion is: "${motion}". Deliver a strong, structured opening argument in favor of your side in 5-10 sentences. One clear point per rebuttal. Use evidence-based reasoning.`
-      : `You are a debate opponent. The motion is: "${motion}". The user argues: "${userArgument}". Provide a structured rebuttal with evidence-based reasoning in 5-10 sentences. Minimize to two counter-arguments depending on the length of the user's argument.`;
+      ? `You are a debate opponent. The motion is: "${motion}". Deliver a strong, structured opening argument in favor of your side in 5-10 sentences. One clear point per rebuttal. Use evidence-based reasoning. ${lengthInstruction}`
+      : `You are a debate opponent. The motion is: "${motion}". The user argues: "${userArgument}". Provide a structured rebuttal with evidence-based reasoning in 5-10 sentences. Minimize to two counter-arguments depending on the length of the user's argument. ${lengthInstruction}`;
 
     const result = await model.generateContent(prompt);
     const response = result.response.text();
@@ -44,19 +50,17 @@ app.post('/api/summary', async (req, res) => {
     ).join('\n\n');
 
     const prompt = `You are a debate judge. Analyze this debate and return ONLY a JSON object with no markdown, no backticks, no explanation.
+    Motion: "${motion}"
+    User Stance: "${stance}"
+    Transcript:
+    ${transcript}
 
-Motion: "${motion}"
-User Stance: "${stance}"
-
-Transcript:
-${transcript}
-
-Return this exact JSON structure:
-{
-  "userScore": <number from 0-100>,
-  "aiScore": <number from 0-100, must equal 100 minus userScore>,
-  "feedback": ["feedback point 1", "feedback point 2", "feedback point 3"]
-}`;
+    Return this exact JSON structure:
+    {
+      "userScore": <number from 0-100>,
+      "aiScore": <number from 0-100, must equal 100 minus userScore>,
+      "feedback": ["feedback point 1", "feedback point 2", "feedback point 3"]
+    }`;
 
     const result = await model.generateContent(prompt);
     const raw = result.response.text();

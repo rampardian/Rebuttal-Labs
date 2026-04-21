@@ -7,11 +7,12 @@ export default function DebateSetup() {
   const [stance, setStance] = useState("");
   const [order, setOrder] = useState("");
   const [openingStatement, setOpeningStatement] = useState("");
+  const [rebuttalMode, setRebuttalMode] = useState("strict");
 
   const handleConfirm = () => {
-    if (!motion || !stance || !order) return;
+    if (!motion || !stance || !order || !rebuttalMode) return;
     navigate("/debate/session", {
-      state: { motion, stance, order, openingStatement },
+      state: { motion, stance, order, openingStatement, rebuttalMode },
     });
   };
 
@@ -96,6 +97,48 @@ export default function DebateSetup() {
         </div>
       </div>
 
+      {/* REBUTTAL MODE */}
+      <div className="mb-8">
+        <label className="block text-xs uppercase tracking-widest text-gray-400 mb-3">
+          Rebuttal Mode
+        </label>
+        <div className="flex gap-4">
+          <button
+            onClick={() => setRebuttalMode("blitz")}
+            className={`flex-1 py-3 rounded-md text-sm font-semibold border transition ${
+              rebuttalMode === "blitz"
+                ? "bg-indigo-600 border-indigo-500 text-white"
+                : "bg-gray-900 border-gray-700 text-gray-400 hover:border-indigo-500"
+            }`}
+          >
+            <span className="block text-base mb-1">  Blitz</span>
+            <span className="block text-xs font-normal text-gray-400">Fast and sharp. 2–3 sentences.</span>
+          </button>
+          <button
+            onClick={() => setRebuttalMode("clash")}
+            className={`flex-1 py-3 rounded-md text-sm font-semibold border transition ${
+              rebuttalMode === "clash"
+                ? "bg-indigo-600 border-indigo-500 text-white"
+                : "bg-gray-900 border-gray-700 text-gray-400 hover:border-indigo-500"
+          }`}
+          >
+            <span className="block text-base mb-1">  Clash</span>
+            <span className="block text-xs font-normal text-gray-400">Focused and grounded. 5–6 sentences.</span>
+          </button>
+          <button
+            onClick={() => setRebuttalMode("grandslam")}
+              className={`flex-1 py-3 rounded-md text-sm font-semibold border transition ${
+              rebuttalMode === "grandslam"
+                ? "bg-indigo-600 border-indigo-500 text-white"
+                : "bg-gray-900 border-gray-700 text-gray-400 hover:border-indigo-500"
+            }`}
+          >
+            <span className="block text-base mb-1">  Grand Slam</span>
+            <span className="block text-xs font-normal text-gray-400">Full-length, detailed. 8–10 sentences.</span>
+          </button>
+        </div>
+      </div>
+
       {/* OPENING STATEMENT - only if user goes first */}
       {order === "user" && (
         <div className="mb-8">
@@ -119,7 +162,7 @@ export default function DebateSetup() {
       {/* CONFIRM BUTTON */}
       <button
         onClick={handleConfirm}
-        disabled={!motion || !stance || !order}
+        disabled={!motion || !stance || !order || !rebuttalMode}
         className="w-full bg-indigo-500 py-3 rounded-md font-semibold text-sm hover:bg-indigo-600 transition disabled:opacity-50"
       >
         Confirm & Enter Debate

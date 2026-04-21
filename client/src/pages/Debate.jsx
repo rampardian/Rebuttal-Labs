@@ -7,7 +7,7 @@ import {useLocation, useNavigate} from "react-router-dom";
 export default function Debate() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { motion = "No motion provided.", stance, order, openingStatement} = location.state || {};
+  const { motion = "No motion provided.", stance, order, openingStatement, rebuttalMode } = location.state || {};
 
   const [exchanges, setExchanges] = useState(
     order === "user" && openingStatement ? [{ role: "user", text: openingStatement }] : []
@@ -28,6 +28,7 @@ export default function Debate() {
           body: JSON.stringify({
             motion,
             userArgument: argument,
+            rebuttalMode
           }),
         });
         const data = await response.json();
@@ -49,6 +50,7 @@ export default function Debate() {
           body: JSON.stringify({
             motion,
             isOpening: true,
+            rebuttalMode
           }),
         });
         const data = await response.json();
