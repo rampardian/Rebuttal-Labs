@@ -20,7 +20,7 @@ export default function DebateSummary() {
         });
         const data = await response.json();
         setSummary(data);
-      } catch (err) {
+      } catch (error) {
         setError(true);
       } finally {
         setLoading(false);

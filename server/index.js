@@ -65,7 +65,7 @@ app.post('/api/summary', async (req, res) => {
     const result = await model.generateContent(prompt);
     const raw = result.response.text();
     const cleaned = raw.replace(/```json|```/g, "").trim();
-    const parsed = JSON.parse(cleaned);
+    const parsed = JSON.parse(cleaned);x
 
     res.json(parsed);
   } catch (error) {
