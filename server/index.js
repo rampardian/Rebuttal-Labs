@@ -17,7 +17,7 @@ app.post('/api/debate', async (req, res) => {
   const { motion, userArgument, isOpening, rebuttalMode } = req.body;
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite-preview' });
 
     const lengthInstruction = 
       rebuttalMode === "blitz" ? " Respond in 5-10 sentences." :
@@ -43,7 +43,7 @@ app.post('/api/summary', async (req, res) => {
   const { motion, stance, exchanges } = req.body;
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-preview' });
     
     const transcript = exchanges.map((e) => 
       `${e.role === 'user' ? 'USER' : 'OPPONENT'}: ${e.text}`
