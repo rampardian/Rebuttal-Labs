@@ -60,12 +60,25 @@ app.post('/api/summary', async (req, res) => {
       "userScore": <number from 0-100>,
       "aiScore": <number from 0-100, must equal 100 minus userScore>,
       "feedback": ["feedback point 1", "feedback point 2", "feedback point 3"]
-    }`;
+      "nodes":[
+      {"id": 1, "label": "<short 5-7 word summary of argument>", "role": "user"},
+      {"id": 2, "label": "<short 5-7 word summary of argument>", "role": "ai"}
+      ],
+      "edges":[
+        {"from": 2, "to": 1, "label": "Rebuts"}
+      ]
+    }
+      
+    Each exchange in the transcript should become a node. Edges should connect arguments that directly respond to each other, labeled either "Rebuts" or "Supports".
+
+    `;
+
+    
 
     const result = await model.generateContent(prompt);
     const raw = result.response.text();
     const cleaned = raw.replace(/```json|```/g, "").trim();
-    const parsed = JSON.parse(cleaned);x
+    const parsed = JSON.parse(cleaned);
 
     res.json(parsed);
   } catch (error) {

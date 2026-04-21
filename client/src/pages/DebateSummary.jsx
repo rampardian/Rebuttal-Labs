@@ -1,5 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useRef } from "react";
+import { Network } from "vis-network";
 
 export default function DebateSummary() {
   const location = useLocation();
@@ -9,6 +11,7 @@ export default function DebateSummary() {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const networkRef = useRef(null);
 
   useEffect(() => {
     const fetchSummary = async () => {
@@ -29,6 +32,49 @@ export default function DebateSummary() {
 
     fetchSummary();
   }, []);
+
+  useEffect(() => {
+    if (!summary?.nodes || !summary?.edges || !networkRef.current) return;
+
+    const truncateLabel = (text, maxWords = 7) => {
+      const words = text.trim().split(/\s+/);
+      if (words.length <= maxWords) return text;
+      return words.slice(0, maxWords).join(" ") + "...";
+    };
+
+    const nodes = summary.nodes.map((n) => ({
+      id: n.id,
+      label: truncateLabel(n.label),
+      color: n.role === "user" ? "#4f46e5" : "#991b1b",
+      font: { color: "#ffffff", size: 12 },
+      shape: "box",
+      margin: 10,
+    }));
+
+    const edges = summary.edges.map((e) => ({
+      from: e.from,
+      to: e.to,
+      label: e.label,
+      arrows: "to",
+      color: e.label === "Rebuts" ? "#ef4444" : "#22c55e",
+      font: { color: "#9ca3af", size: 10, align: "middle" },
+    }));
+
+    const options = {
+      background: { color: "transparent" },
+      physics: {
+        enabled: true,
+        stabilization: { iterations: 200 },
+      },
+      interaction: {
+        hover: true,
+        zoomView: true,
+        dragView: true,
+      },
+    };
+
+    new Network(networkRef.current, { nodes, edges }, options);
+  }, [summary]);
 
   return (
     <div className="min-h-screen bg-gray-950 text-white px-8 py-12 max-w-5xl mx-auto">
@@ -100,10 +146,18 @@ export default function DebateSummary() {
           {/* SPIDERWEB PLACEHOLDER */}
           <div className="mb-12">
             <h2 className="text-xl font-bold mb-4">Knowledge Map</h2>
-            <div className="w-full h-64 bg-gray-900 border border-gray-700 rounded-md flex items-center justify-center">
-              <p className="text-gray-600 text-sm">Spiderweb Knowledge Map — Coming Soon</p>
+            <div className="text-xs text-gray-500 flex gap-6 mb-3">
+                <span><span className="inline-block w-3 h-3 rounded-sm bg-indigo-600 mr-1"></span>Your Arguments</span>
+                <span><span className="inline-block w-3 h-3 rounded-sm bg-red-800 mr-1"></span>Opponent's Arguments</span>
+                <span><span className="text-red-400 mr-1">—</span>Rebuts</span>
+                <span><span className="text-green-500 mr-1">—</span>Supports</span>
+              </div>
+              <div
+                ref={networkRef}
+                className="w-full bg-gray-900 border border-gray-700 rounded-md"
+                style={{ height: "500px" }}
+              />
             </div>
-          </div>
         </>
       )}
 
