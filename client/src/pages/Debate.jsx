@@ -10,17 +10,14 @@ export default function Debate() {
   const { motion = "No motion provided.", stance, order, openingStatement} = location.state || {};
 
   const [exchanges, setExchanges] = useState(
-    openingStatement ? [{role: "user", text: openingStatement}] : []
+    order === "user" && openingStatement ? [{ role: "user", text: openingStatement }] : []
   );
+
   const [userInput, setUserInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [sessionEnded, setSessionEnded] = useState(false);
 
-  useEffect(() => {
-    if (openingStatement && order === "user") {
-      generateAIResponse(openingStatement);
-      }
-    }, []);
+
 
     const generateAIResponse = async (argument) => {
       setLoading(true);
@@ -42,31 +39,42 @@ export default function Debate() {
 
       }
     };
+
+    const generateAIOpening = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch("http://localhost:3000/api/debate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            motion,
+            isOpening: true,
+          }),
+        });
+        const data = await response.json();
+        setExchanges([{ role: "ai", text: data.rebuttal }]);
+      } catch (error) {
+        setExchanges([{ role: "ai", text: "Error connecting to server." }]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+      useEffect(() => {
+    if (order === "user" && openingStatement) {
+      generateAIResponse(openingStatement);
+      } else if (order === "ai") {
+        generateAIOpening();
+      }
+    }, []);
+
+
     const handleSubmit = async () => {
-    if (!userInput.trim() || loading) return;
-
-    const newExchanges = [...exchanges, { role: "user", text: userInput }];
-    setExchanges(newExchanges);
-    setUserInput("");
-    await generateAIResponse(userInput);
-
-    try {
-      const response = await fetch("http://localhost:3000/api/debate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          motion: motion,
-          userArgument: userInput,
-        }),
-      });
-
-      const data = await response.json();
-      setExchanges([...newExchanges, { role: "ai", text: data.rebuttal }]);
-    } catch (error) {
-      setExchanges([...newExchanges, { role: "ai", text: "Error connecting to server." }]);
-    } finally {
-      setLoading(false);
-    }
+      if (!userInput.trim() || loading) return;
+      
+      setExchanges((prev) => [...prev, { role: "user", text: userInput }]);
+      setUserInput("");
+      await generateAIResponse(userInput);
   };
 
   const handleEndSession = () => {
@@ -86,9 +94,11 @@ export default function Debate() {
 
       {/* EXCHANGE AREA */}
       <div className="flex-1 overflow-y-auto px-8 py-8">
-        {exchanges.length === 0 && (
+        {exchanges.length === 0 && !loading && (
           <p className="text-gray-600 text-sm text-center mt-20">
-            The debate has not started yet. Make your opening argument below.
+            {order === "user" 
+            ? "The debate has not started yet. Make your opening statement below."
+            : "Waiting for opponent's opening argument..."}
           </p>
         )}
 

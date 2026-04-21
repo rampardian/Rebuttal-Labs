@@ -14,12 +14,15 @@ app.get('/', (req, res) => {
 });
 
 app.post('/api/debate', async (req, res) => {
-  const { motion, userArgument } = req.body;
+  const { motion, userArgument, isOpening } = req.body;
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-    const prompt = `You are a debate opponent. The motion is: "${motion}". The user argues: "${userArgument}". Provide a structured rebuttal with evidence-based reasoning.`;
-    
+    const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+
+    const prompt = isOpening
+      ? `You are a debate opponent. The motion is: "${motion}". Deliver a strong, structured opening argument in favor of your side in 5-10 sentences. One clear point per rebuttal. Use evidence-based reasoning.`
+      : `You are a debate opponent. The motion is: "${motion}". The user argues: "${userArgument}". Provide a structured rebuttal with evidence-based reasoning in 5-10 sentences. Minimize to two counter-arguments depending on the length of the user's argument.`;
+
     const result = await model.generateContent(prompt);
     const response = result.response.text();
 
@@ -34,7 +37,7 @@ app.post('/api/summary', async (req, res) => {
   const { motion, stance, exchanges } = req.body;
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
     
     const transcript = exchanges.map((e) => 
       `${e.role === 'user' ? 'USER' : 'OPPONENT'}: ${e.text}`
